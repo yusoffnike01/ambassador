@@ -12,6 +12,10 @@ export class UserService {
   async save(Options) {
     return await this.userRepository.save(Options);
   }
+
+  async find(Options) {
+    return await this.userRepository.find(Options);
+  }
   async findOne(Options) {
     return await this.userRepository.findOne(Options);
   }
