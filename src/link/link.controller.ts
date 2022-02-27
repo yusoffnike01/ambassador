@@ -9,6 +9,7 @@ export class LinkController {
   async all(@Param('id') id: number) {
     return await this.linkService.find({
       user: id,
+      relations: ['orders'],
     });
   }
 }
