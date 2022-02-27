@@ -35,10 +35,6 @@ export class AuthController {
       );
     }
 
-    const user = await this.userService.findOne({ email: body.email });
-    if (!user) {
-      throw new BadRequestException('User already exists');
-    }
     const hashed = await bcrypt.hash(body.password, 12);
 
     return this.userService.save({
@@ -54,6 +50,7 @@ export class AuthController {
     @Body('email') email: string,
     @Body('password') password: string,
     @Res({ passthrough: true }) response: Response,
+    @Req() request: Request,
   ) {
     const user = await this.userService.findOne({ email });
     if (!user) {
@@ -62,8 +59,13 @@ export class AuthController {
     if (!(await bcrypt.compare(password, user.password))) {
       throw new BadRequestException('Invalid password');
     }
+    const adminLogin = request.path === '/api/auth/admin/login';
+    if (adminLogin && user.is_ambassador) {
+      throw new BadRequestException('You are not an admin');
+    }
     const jwt = await this.jwtService.signAsync({
       id: user.id,
+      scope: adminLogin ? 'admin' : 'ambassador',
     });
     response.cookie('jwt', jwt, { httpOnly: true });
     return {
