@@ -26,24 +26,30 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
-  @Post('admin/register')
-  async register(@Body() body: RegisterDto) {
+  @Post(['admin/register', 'ambassador/register'])
+  async register(@Req() request: Request, @Body() body: RegisterDto) {
     const { password_confirm, ...data } = body;
     if (body.password !== password_confirm) {
       throw new BadRequestException(
         'Password and confirm password do not match',
       );
     }
+
+    const user = await this.userService.findOne({ email: body.email });
+    if (!user) {
+      throw new BadRequestException('User already exists');
+    }
     const hashed = await bcrypt.hash(body.password, 12);
 
     return this.userService.save({
       ...data,
       password: hashed,
-      is_ambassador: false,
+      is_ambassador:
+        request.path === '/api/auth/ambassador/register' ? true : false,
     });
   }
 
-  @Post('admin/login')
+  @Post(['admin/login', 'ambassador/login'])
   async login(
     @Body('email') email: string,
     @Body('password') password: string,
@@ -67,7 +73,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
-  @Get('admin/user')
+  @Get(['admin/user', 'ambassador/user'])
   async user(@Req() request: Request) {
     const cookie = request.cookies['jwt'];
     const { id } = await this.jwtService.verifyAsync(cookie);
@@ -75,7 +81,7 @@ export class AuthController {
     return user;
   }
 
-  @Post('admin/logout')
+  @Post(['admin/logout', 'ambassador/logout'])
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('jwt');
     return {
@@ -85,7 +91,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
-  @Put('admin/users/info')
+  @Put(['admin/users/info', 'ambassador/users/info'])
   async updateInfo(
     @Req() request: Request,
     @Body('first_name') first_name: string,
