@@ -99,6 +99,15 @@ export class ProductController {
         return request.query.sort === 'asc' ? sign : -sign;
       });
     }
-    return products;
+
+    const page: number = parseInt(request.query.page as any) || 1;
+    const perPage = 9;
+    const total = products.length;
+    const data = products.slice((page - 1) * perPage, page * perPage);
+    return {
+      data,
+      total,
+      last_page: Math.ceil(total / perPage),
+    };
   }
 }
