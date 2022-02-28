@@ -79,8 +79,18 @@ export class AuthController {
   async user(@Req() request: Request) {
     const cookie = request.cookies['jwt'];
     const { id } = await this.jwtService.verifyAsync(cookie);
-    const user = await this.userService.findOne({ id });
-    return user;
+    if (request.path === '/api/auth/admin/user') {
+      return await this.userService.findOne({ id });
+    }
+    const user = await this.userService.findOne({
+      id,
+      relations: ['orders', 'orders.order_items'],
+    });
+    const { orders, password, ...data } = user;
+    return {
+      ...data,
+      revenue: user.revenue,
+    };
   }
 
   @Post(['admin/logout', 'ambassador/logout'])
