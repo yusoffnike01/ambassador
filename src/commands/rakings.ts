@@ -18,7 +18,7 @@ import { UserService } from '../user/user.service';
   const client = redisService.getClient();
 
   for (let i = 0; i < ambassador.length; i++) {
-    client.zadd('rakings', ambassador[i].revenue, ambassador[i].name);
+    client.zadd('rankings', ambassador[i].revenue, ambassador[i].name);
   }
   process.exit();
 })();
