@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Link } from 'src/link/link';
-import { User } from 'src/user/user';
+import { Link } from '../link/link';
+import { User } from '../user/user';
 import {
   Column,
   Entity,

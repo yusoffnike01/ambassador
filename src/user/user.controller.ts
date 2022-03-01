@@ -2,17 +2,22 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { User } from './user';
+import { RedisService } from '../shared/redis.service';
+import { AuthGuard } from '../auth/auth.guard';
 import { UserService } from './user.service';
+import { Response } from 'express';
 
 @UseGuards(AuthGuard)
 @Controller('')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private redisService: RedisService,
+  ) {}
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('admin/ambassadors')
@@ -21,16 +26,29 @@ export class UserController {
   }
 
   @Get('ambassador/rakings')
-  async rakings() {
-    const ambassador: User[] = await this.userService.find({
-      is_ambassador: true,
-      relations: ['orders', 'orders.order_items'],
-    });
-    return ambassador.map((ambassador) => {
-      return {
-        name: ambassador.name,
-        revenue: ambassador.revenue,
-      };
-    });
+  async rakings(@Res() response: Response) {
+    const client = this.redisService.getClient();
+    client.zrevrangebyscore(
+      'rankings',
+      '+inf',
+      '-inf',
+      'WITHSCORES',
+      (err, result) => {
+        let score;
+        response.send(
+          result.reduce((o, r) => {
+            if (isNaN(parseInt(r))) {
+              return {
+                ...o,
+                [r]: score,
+              };
+            } else {
+              score = parseInt(r);
+              return o;
+            }
+          }, {}),
+        );
+      },
+    );
   }
 }

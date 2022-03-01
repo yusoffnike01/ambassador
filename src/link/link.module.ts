@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/auth/auth.module';
-import { SharedModule } from 'src/shared/shared.module';
+import { AuthModule } from '../auth/auth.module';
+import { SharedModule } from '../shared/shared.module';
 import { Link } from './link';
 import { LinkController } from './link.controller';
 import { LinkService } from './link.service';

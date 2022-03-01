@@ -7,11 +7,11 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthGuard } from '../auth/auth.guard';
+import { AuthService } from '../auth/auth.service';
 import { LinkService } from './link.service';
 import { Request } from 'express';
-import { Order } from 'src/order/order';
+import { Order } from '../order/order';
 
 @Controller('')
 export class LinkController {

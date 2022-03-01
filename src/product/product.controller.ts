@@ -15,7 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 import { ProductCreateDto } from './dtos/product-create';
 import { ProductService } from './product.service';
 import { Cache } from 'cache-manager';
